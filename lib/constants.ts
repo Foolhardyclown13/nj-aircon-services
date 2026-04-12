@@ -1,0 +1,69 @@
+export const BUSINESS = {
+  name: "NJ Aircon Services",
+  phone: "0938-503-2512",
+  facebookUrl: "https://www.facebook.com/CoolTechApplianceServices", // TODO: Update when page name changes
+  facebookMessengerUrl: "https://m.me/CoolTechApplianceServices", // TODO: Update when page name changes
+  address: "Alabel, Sarangani Province, Philippines",
+  email: "", // Optional: add your email address
+};
+
+export const SERVICE_AREAS = [
+  { name: "Alabel", note: "Our home base in Sarangani Province" },
+  { name: "General Santos City", note: "Full coverage across GenSan" },
+  { name: "Malapatan", note: "Serving Malapatan and nearby barangays" },
+  { name: "Polomolok", note: "Available in Polomolok, South Cotabato" },
+];
+
+export const SERVICES = [
+  {
+    name: "Regular Clean",
+    price: 500,
+    duration: "45 mins/unit",
+    description:
+      "Standard filter and coil cleaning to keep your aircon running efficiently. Perfect for regular maintenance.",
+    icon: "🌬️",
+  },
+  {
+    name: "Deep Clean",
+    price: 900,
+    duration: "2 hrs/unit",
+    description:
+      "Full disassembly and thorough chemical cleaning. Best for aircons that haven't been serviced in a long time.",
+    icon: "🧹",
+  },
+  {
+    name: "Preventive Maintenance",
+    price: 600,
+    duration: "1 hr/unit",
+    description:
+      "Complete inspection, cleaning, and performance check to prevent costly breakdowns.",
+    icon: "🔧",
+  },
+];
+
+export const WHY_CHOOSE_US = [
+  {
+    title: "Experienced Technicians",
+    description:
+      "Our team is trained and experienced in servicing all major aircon brands — Samsung, LG, Carrier, Daikin, and more.",
+    icon: "👨‍🔧",
+  },
+  {
+    title: "Affordable Prices",
+    description:
+      "We offer competitive rates without hidden charges. What you see on the price list is what you pay.",
+    icon: "💰",
+  },
+  {
+    title: "Same-Day Service Available",
+    description:
+      "Need urgent aircon cleaning? We accommodate same-day bookings when slots are available.",
+    icon: "⚡",
+  },
+  {
+    title: "Satisfaction Guaranteed",
+    description:
+      "We're not done until you're happy. Our work is backed by our commitment to quality service.",
+    icon: "✅",
+  },
+];
