@@ -16,7 +16,7 @@ export const SERVICE_AREAS = [
 
 export const SERVICES = [
   {
-    name: "Regular Clean",
+    name: "Window Type",
     price: 500,
     duration: "45 mins/unit",
     description:
@@ -24,20 +24,12 @@ export const SERVICES = [
     icon: "🌬️",
   },
   {
-    name: "Deep Clean",
-    price: 900,
+    name: "Split Type",
+    price: 1000,
     duration: "2 hrs/unit",
     description:
       "Full disassembly and thorough chemical cleaning. Best for aircons that haven't been serviced in a long time.",
     icon: "🧹",
-  },
-  {
-    name: "Preventive Maintenance",
-    price: 600,
-    duration: "1 hr/unit",
-    description:
-      "Complete inspection, cleaning, and performance check to prevent costly breakdowns.",
-    icon: "🔧",
   },
 ];
 
