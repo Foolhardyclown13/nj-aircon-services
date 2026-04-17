@@ -49,7 +49,7 @@ export default function Contact() {
       <div className="max-w-6xl mx-auto px-4">
         <div className="text-center mb-14">
           <h2 className="font-poppins font-extrabold text-3xl sm:text-4xl text-navy mb-4">
-            Book a Cleaning or Send Us a Message
+            Book Your Aircon Cleaning in Alabel or GenSan Today
           </h2>
           <p className="text-gray-500 text-lg max-w-xl mx-auto">
             Fill out the form below and we&apos;ll get back to you ASAP. Or

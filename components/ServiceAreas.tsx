@@ -6,7 +6,7 @@ export default function ServiceAreas() {
       <div className="max-w-6xl mx-auto px-4">
         <div className="text-center mb-14">
           <h2 className="font-poppins font-extrabold text-3xl sm:text-4xl text-navy mb-4">
-            Aircon Cleaning Service Areas
+            We Serve Alabel, General Santos City &amp; South Cotabato
           </h2>
           <p className="text-gray-500 text-lg max-w-xl mx-auto">
             We cover Alabel and nearby cities — fast, reliable service wherever

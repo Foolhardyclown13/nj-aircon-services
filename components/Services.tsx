@@ -7,7 +7,7 @@ export default function Services() {
       <div className="max-w-6xl mx-auto px-4">
         <div className="text-center mb-14">
           <h2 className="font-poppins font-extrabold text-3xl sm:text-4xl text-navy mb-4">
-            Aircon Cleaning Services &amp; Pricing
+            Aircon Cleaning Services in Sarangani Province
           </h2>
           <p className="text-gray-500 text-lg max-w-xl mx-auto">
             Transparent, affordable rates for every cleaning need — no hidden

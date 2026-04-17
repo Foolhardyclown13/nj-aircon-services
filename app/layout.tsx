@@ -31,6 +31,9 @@ export const metadata: Metadata = {
     "aircon cleaning Malapatan",
     "aircon service Sarangani Province",
   ],
+  alternates: {
+    canonical: "https://njairconservices.com/",
+  },
   openGraph: {
     title:
       "Aircon Cleaning in Alabel & General Santos City | NJ Aircon Services",
@@ -54,18 +57,29 @@ const jsonLd = {
   "@context": "https://schema.org",
   "@type": "LocalBusiness",
   name: BUSINESS.name,
-  telephone: BUSINESS.phone,
+  url: "https://njairconservices.com/",
+  telephone: "+639385032512",
   address: {
     "@type": "PostalAddress",
     addressLocality: "Alabel",
     addressRegion: "Sarangani Province",
     addressCountry: "PH",
   },
-  areaServed: SERVICE_AREAS.map((area) => area.name),
+  areaServed: [...SERVICE_AREAS.map((area) => area.name), "Sarangani Province", "South Cotabato"],
   priceRange: "₱₱",
-  image: "/images/logo.png",
+  image: "https://njairconservices.com/images/logo.png",
   description:
     "Professional aircon cleaning and preventive maintenance services in Alabel, General Santos City, Malapatan, and Polomolok.",
+  openingHours: "Mo-Sa 08:00-18:00",
+  hasOfferCatalog: {
+    "@type": "OfferCatalog",
+    name: "Aircon Cleaning Services",
+    itemListElement: [
+      { "@type": "Offer", itemOffered: { "@type": "Service", name: "Regular Aircon Clean" } },
+      { "@type": "Offer", itemOffered: { "@type": "Service", name: "Aircon Deep Clean" } },
+      { "@type": "Offer", itemOffered: { "@type": "Service", name: "Preventive Maintenance" } },
+    ],
+  },
 };
 
 export default function RootLayout({
@@ -83,22 +97,18 @@ export default function RootLayout({
       </head>
       <body className={`${inter.variable} ${poppins.variable}`}>
         {children}
-        {process.env.NEXT_PUBLIC_GA_ID && (
-          <>
-            <Script
-              src={`https://www.googletagmanager.com/gtag/js?id=${process.env.NEXT_PUBLIC_GA_ID}`}
-              strategy="afterInteractive"
-            />
-            <Script id="google-analytics" strategy="afterInteractive">
-              {`
-                window.dataLayer = window.dataLayer || [];
-                function gtag(){dataLayer.push(arguments);}
-                gtag('js', new Date());
-                gtag('config', '${process.env.NEXT_PUBLIC_GA_ID}');
-              `}
-            </Script>
-          </>
-        )}
+        <Script
+          src="https://www.googletagmanager.com/gtag/js?id=G-TYFPWG0XW8"
+          strategy="afterInteractive"
+        />
+        <Script id="google-analytics" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'G-TYFPWG0XW8');
+          `}
+        </Script>
       </body>
     </html>
   );

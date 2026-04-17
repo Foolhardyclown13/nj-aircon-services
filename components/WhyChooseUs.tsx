@@ -7,7 +7,7 @@ export default function WhyChooseUs() {
       <div className="max-w-6xl mx-auto px-4">
         <div className="text-center mb-14">
           <h2 className="font-poppins font-extrabold text-3xl sm:text-4xl text-white mb-4">
-            Why Choose NJ Aircon Services?
+            Why Alabel &amp; GenSan Homeowners Choose NJ Aircon
           </h2>
           <p className="text-gray-400 text-lg max-w-xl mx-auto">
             We&apos;re your trusted local aircon cleaning experts in Sarangani
