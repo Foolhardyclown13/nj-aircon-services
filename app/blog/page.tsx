@@ -12,9 +12,9 @@ export const metadata: Metadata = {
 const POSTS = [
   {
     slug: "regular-clean-vs-deep-clean-vs-preventive-maintenance",
-    title: "Regular Clean vs. Deep Clean vs. Preventive Maintenance: Which One Does Your Aircon Need?",
+    title: "Window Type vs Split Type Aircon Cleaning: What's the Difference?",
     excerpt:
-      "Not sure whether your aircon needs a regular clean, deep clean, or preventive maintenance? Here's exactly what each service covers and how to choose the right one.",
+      "Not sure which aircon cleaning service you need? Here's the difference between Window Type (₱500) and Split Type (₱1,000) cleaning — and when to add a deep clean or preventive maintenance on top.",
     date: "April 18, 2026",
     readTime: "6 min read",
     category: "Maintenance Tips",

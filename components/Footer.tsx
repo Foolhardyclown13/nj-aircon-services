@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { BUSINESS, SERVICE_AREAS, SERVICES } from "@/lib/constants";
+import { BUSINESS, SERVICE_AREAS, SERVICES, ADD_ONS } from "@/lib/constants";
 
 export default function Footer() {
   const currentYear = new Date().getFullYear();
@@ -36,10 +36,23 @@ export default function Footer() {
               {SERVICES.map((service) => (
                 <li key={service.name}>
                   <a
-                    href="#services"
+                    href="/#services"
                     className="text-gray-400 text-sm hover:text-primary transition-colors"
                   >
                     {service.name} — ₱{service.price.toLocaleString()}
+                  </a>
+                </li>
+              ))}
+              <li className="pt-1 border-t border-white/10 mt-1">
+                <span className="text-gray-500 text-xs uppercase tracking-wide font-semibold">Add-ons</span>
+              </li>
+              {ADD_ONS.map((addon) => (
+                <li key={addon.name}>
+                  <a
+                    href="/#services"
+                    className="text-gray-400 text-sm hover:text-primary transition-colors"
+                  >
+                    {addon.name}
                   </a>
                 </li>
               ))}

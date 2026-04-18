@@ -33,6 +33,21 @@ export const SERVICES = [
   },
 ];
 
+export const ADD_ONS = [
+  {
+    name: "Deep Clean / Chemical Wash",
+    description:
+      "Full chemical treatment of internal components. Recommended when the unit hasn't been cleaned in over a year, has a musty smell, or is visibly dirty inside.",
+    icon: "🧪",
+  },
+  {
+    name: "Preventive Maintenance",
+    description:
+      "Complete inspection of electrical connections, refrigerant level, and performance. Best for older units or commercial aircons.",
+    icon: "🔧",
+  },
+];
+
 export const WHY_CHOOSE_US = [
   {
     title: "Experienced Technicians",
