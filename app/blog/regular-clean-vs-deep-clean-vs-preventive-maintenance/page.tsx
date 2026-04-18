@@ -62,7 +62,7 @@ export default function BlogPostRegularVsDeep() {
               src="/images/blog-regular-vs-deep.jpg"
               alt="NJ Aircon Services technicians performing aircon service in Alabel Sarangani Province"
               fill
-              className="object-cover"
+              className="object-cover object-right"
               priority
             />
           </div>
