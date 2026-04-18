@@ -25,7 +25,6 @@ export default function Services() {
                   : "bg-light-blue text-navy"
               }`}
             >
-              <span className="text-4xl">{service.icon}</span>
               <div>
                 <h3
                   className={`font-poppins font-bold text-xl mb-1 ${
