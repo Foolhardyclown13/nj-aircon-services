@@ -57,12 +57,13 @@ export default function BlogPostRegularVsDeep() {
           </div>
 
           {/* Hero image */}
-          <div className="relative h-72 sm:h-96 rounded-2xl overflow-hidden shadow-lg mb-10">
+          <div className="relative h-96 sm:h-[500px] rounded-2xl overflow-hidden shadow-lg mb-10">
             <Image
               src="/images/blog-regular-vs-deep.jpg"
               alt="NJ Aircon Services technicians performing aircon service in Alabel Sarangani Province"
               fill
-              className="object-cover object-right"
+              className="object-cover"
+              style={{ objectPosition: "72% 15%" }}
               priority
             />
           </div>
