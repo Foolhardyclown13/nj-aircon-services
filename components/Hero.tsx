@@ -50,7 +50,7 @@ export default function Hero() {
             Call Us Now
           </a>
           <Link
-            href="/get-a-quote"
+            href="/book"
             className="w-full sm:w-auto bg-white text-navy hover:bg-light-blue font-poppins font-bold text-lg px-8 py-4 rounded-2xl shadow-lg transition-all hover:scale-105 flex items-center justify-center gap-2"
           >
             <svg

@@ -9,6 +9,7 @@ import { BUSINESS } from "@/lib/constants";
 const NAV_LINKS = [
   { label: "Home", href: "/" },
   { label: "Services", href: "/services" },
+  { label: "Book Now", href: "/book" },
   { label: "Get A Quote", href: "/get-a-quote" },
   { label: "Blog", href: "/blog" },
   { label: "About Us", href: "/about" },
