@@ -5,12 +5,22 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { BUSINESS, SERVICES, SERVICE_AREAS, ADD_ONS } from "@/lib/constants";
 
+const TIME_SLOTS = [
+  { value: "09:00", label: "9:00 AM" },
+  { value: "10:00", label: "10:00 AM" },
+  { value: "11:00", label: "11:00 AM" },
+  { value: "14:00", label: "2:00 PM" },
+  { value: "15:00", label: "3:00 PM" },
+  { value: "16:00", label: "4:00 PM" },
+];
+
 function buildCalendarUrl(data: {
   name: string;
   service: string;
   units: string;
   area: string;
   preferredDate: string;
+  preferredTime: string;
   addOns: string[];
   message: string;
 }) {
@@ -24,6 +34,8 @@ function buildCalendarUrl(data: {
 
   const durationMins = (data.service === "Window Type" ? 45 : 120) * units;
   const totalPrice = service ? service.price * units : 0;
+
+  const timeLabel = TIME_SLOTS.find((t) => t.value === data.preferredTime)?.label ?? "";
 
   const details = encodeURIComponent(
     [
@@ -51,7 +63,17 @@ function buildCalendarUrl(data: {
   const location = encodeURIComponent(`${data.area}, Philippines`);
 
   let dates = "";
-  if (data.preferredDate) {
+  if (data.preferredDate && data.preferredTime) {
+    // Timed event: start at chosen time, end after estimated duration
+    const [startH, startM] = data.preferredTime.split(":").map(Number);
+    const start = new Date(`${data.preferredDate}T00:00:00`);
+    start.setHours(startH, startM, 0);
+    const end = new Date(start.getTime() + durationMins * 60 * 1000);
+    const fmtDateTime = (dt: Date) =>
+      `${dt.getFullYear()}${String(dt.getMonth() + 1).padStart(2, "0")}${String(dt.getDate()).padStart(2, "0")}T${String(dt.getHours()).padStart(2, "0")}${String(dt.getMinutes()).padStart(2, "0")}00`;
+    dates = `${fmtDateTime(start)}/${fmtDateTime(end)}`;
+  } else if (data.preferredDate) {
+    // All-day fallback if no time chosen
     const d = new Date(data.preferredDate + "T00:00:00");
     const next = new Date(d);
     next.setDate(next.getDate() + 1);
@@ -73,6 +95,7 @@ type FormData = {
   units: string;
   addOns: string[];
   preferredDate: string;
+  preferredTime: string;
   message: string;
 };
 
@@ -86,6 +109,7 @@ export default function GetAQuotePage() {
     units: "1",
     addOns: [],
     preferredDate: "",
+    preferredTime: "",
     message: "",
   });
   const [submittedData, setSubmittedData] = useState<FormData | null>(null);
@@ -128,6 +152,9 @@ export default function GetAQuotePage() {
           addOns: formData.addOns.length > 0 ? formData.addOns.join(", ") : "None",
           units: formData.units,
           preferredDate: formData.preferredDate || "Not specified",
+          preferredTime: formData.preferredTime
+            ? (TIME_SLOTS.find((t) => t.value === formData.preferredTime)?.label ?? formData.preferredTime)
+            : "Not specified",
           estimatedBasePrice: totalPrice > 0 ? `₱${totalPrice.toLocaleString()}` : "—",
           message: formData.message || "—",
           addToCalendar: calendarUrl,
@@ -145,6 +172,7 @@ export default function GetAQuotePage() {
           units: "1",
           addOns: [],
           preferredDate: "",
+          preferredTime: "",
           message: "",
         });
       } else {
@@ -220,6 +248,11 @@ export default function GetAQuotePage() {
                         {new Date(submittedData.preferredDate + "T00:00:00").toLocaleDateString("en-PH", {
                           month: "long", day: "numeric", year: "numeric",
                         })}
+                        {submittedData.preferredTime && (
+                          <span className="text-primary ml-1">
+                            @ {TIME_SLOTS.find((t) => t.value === submittedData.preferredTime)?.label}
+                          </span>
+                        )}
                       </span>
                     </div>
                   )}
@@ -252,7 +285,7 @@ export default function GetAQuotePage() {
                 </p>
 
                 <button
-                  onClick={() => { setStatus("idle"); setSubmittedData(null); }}
+                  onClick={() => { setStatus("idle"); setSubmittedData(null); setFormData({ name: "", phone: "", area: "", service: "", units: "1", addOns: [], preferredDate: "", preferredTime: "", message: "" }); }}
                   className="text-primary font-semibold hover:underline text-sm text-center"
                 >
                   Submit another request
@@ -326,15 +359,28 @@ export default function GetAQuotePage() {
                 </div>
 
                 <div>
-                  <label htmlFor="preferredDate" className="block font-poppins font-semibold text-navy text-sm mb-2">
-                    Preferred Date <span className="text-gray-400 font-normal">(optional)</span>
+                  <label className="block font-poppins font-semibold text-navy text-sm mb-2">
+                    Preferred Schedule <span className="text-gray-400 font-normal">(optional)</span>
                   </label>
-                  <input
-                    id="preferredDate" name="preferredDate" type="date"
-                    value={formData.preferredDate} onChange={handleChange}
-                    min={new Date().toISOString().split("T")[0]}
-                    className="w-full border border-sky-200 rounded-xl px-4 py-3 text-navy focus:outline-none focus:ring-2 focus:ring-primary bg-white"
-                  />
+                  <div className="grid grid-cols-2 gap-3">
+                    <input
+                      id="preferredDate" name="preferredDate" type="date"
+                      value={formData.preferredDate} onChange={handleChange}
+                      min={new Date().toISOString().split("T")[0]}
+                      className="w-full border border-sky-200 rounded-xl px-4 py-3 text-navy focus:outline-none focus:ring-2 focus:ring-primary bg-white"
+                    />
+                    <select
+                      id="preferredTime" name="preferredTime"
+                      value={formData.preferredTime} onChange={handleChange}
+                      className="w-full border border-sky-200 rounded-xl px-4 py-3 text-navy focus:outline-none focus:ring-2 focus:ring-primary bg-white"
+                    >
+                      <option value="">Any time</option>
+                      {TIME_SLOTS.map((slot) => (
+                        <option key={slot.value} value={slot.value}>{slot.label}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <p className="text-gray-400 text-xs mt-1.5">Available 9 AM – 4 PM · Lunch break 12 PM – 1 PM</p>
                 </div>
 
                 <div>
