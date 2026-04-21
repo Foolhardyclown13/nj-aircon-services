@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 import { BUSINESS } from "@/lib/constants";
 
 export default function Hero() {
@@ -48,10 +49,8 @@ export default function Hero() {
             </svg>
             Call Us Now
           </a>
-          <a
-            href={BUSINESS.facebookMessengerUrl}
-            target="_blank"
-            rel="noopener noreferrer"
+          <Link
+            href="/get-a-quote"
             className="w-full sm:w-auto bg-white text-navy hover:bg-light-blue font-poppins font-bold text-lg px-8 py-4 rounded-2xl shadow-lg transition-all hover:scale-105 flex items-center justify-center gap-2"
           >
             <svg
@@ -60,10 +59,10 @@ export default function Hero() {
               viewBox="0 0 24 24"
               fill="currentColor"
             >
-              <path d="M12 2C6.477 2 2 6.145 2 11.243c0 2.914 1.38 5.516 3.54 7.237V22l3.235-1.779A10.726 10.726 0 0012 20.486c5.523 0 10-4.145 10-9.243S17.523 2 12 2zm1.007 12.44l-2.551-2.72-4.978 2.72 5.478-5.814 2.614 2.72 4.916-2.72-5.479 5.814z" />
+              <path d="M19 4h-1V2h-2v2H8V2H6v2H5a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2V6a2 2 0 00-2-2zm0 16H5V10h14v10zm0-12H5V6h14v2z"/>
             </svg>
-            Message on Facebook
-          </a>
+            Book Now
+          </Link>
         </div>
 
         <p className="mt-8 text-gray-300 text-sm">

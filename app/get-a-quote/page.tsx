@@ -19,6 +19,7 @@ function buildCalendarUrl(data: {
   service: string;
   units: string;
   area: string;
+  address: string;
   preferredDate: string;
   preferredTime: string;
   addOns: string[];
@@ -47,6 +48,7 @@ function buildCalendarUrl(data: {
       totalPrice > 0 ? `Base Price: ₱${totalPrice.toLocaleString()} (add-ons quoted on assessment)` : "",
       ``,
       `📍 LOCATION`,
+      data.address ? `Address: ${data.address}` : "",
       `Area: ${data.area}`,
       ``,
       `👤 CUSTOMER`,
@@ -60,7 +62,7 @@ function buildCalendarUrl(data: {
       .join("\n")
   );
 
-  const location = encodeURIComponent(`${data.area}, Philippines`);
+  const location = encodeURIComponent(data.address ? `${data.address}, ${data.area}, Philippines` : `${data.area}, Philippines`);
 
   let dates = "";
   if (data.preferredDate && data.preferredTime) {
@@ -91,6 +93,7 @@ type FormData = {
   name: string;
   phone: string;
   area: string;
+  address: string;
   service: string;
   units: string;
   addOns: string[];
@@ -105,6 +108,7 @@ export default function GetAQuotePage() {
     name: "",
     phone: "",
     area: "",
+    address: "",
     service: "",
     units: "1",
     addOns: [],
@@ -148,6 +152,7 @@ export default function GetAQuotePage() {
           name: formData.name,
           phone: formData.phone,
           area: formData.area,
+          address: formData.address,
           service: formData.service,
           addOns: formData.addOns.length > 0 ? formData.addOns.join(", ") : "None",
           units: formData.units,
@@ -168,6 +173,7 @@ export default function GetAQuotePage() {
           name: "",
           phone: "",
           area: "",
+          address: "",
           service: "",
           units: "1",
           addOns: [],
@@ -241,6 +247,12 @@ export default function GetAQuotePage() {
                     <span className="text-gray-500">Area</span>
                     <span className="font-semibold text-navy">{submittedData.area}</span>
                   </div>
+                  {submittedData.address && (
+                    <div className="flex justify-between">
+                      <span className="text-gray-500">Address</span>
+                      <span className="font-semibold text-navy text-right max-w-[60%]">{submittedData.address}</span>
+                    </div>
+                  )}
                   {submittedData.preferredDate && (
                     <div className="flex justify-between">
                       <span className="text-gray-500">Preferred Date</span>
@@ -285,7 +297,7 @@ export default function GetAQuotePage() {
                 </p>
 
                 <button
-                  onClick={() => { setStatus("idle"); setSubmittedData(null); setFormData({ name: "", phone: "", area: "", service: "", units: "1", addOns: [], preferredDate: "", preferredTime: "", message: "" }); }}
+                  onClick={() => { setStatus("idle"); setSubmittedData(null); setFormData({ name: "", phone: "", area: "", address: "", service: "", units: "1", addOns: [], preferredDate: "", preferredTime: "", message: "" }); }}
                   className="text-primary font-semibold hover:underline text-sm text-center"
                 >
                   Submit another request
@@ -315,6 +327,13 @@ export default function GetAQuotePage() {
                     ))}
                     <option value="Other">Other</option>
                   </select>
+                </div>
+                <div>
+                  <label htmlFor="address" className="block font-poppins font-semibold text-navy text-sm mb-2">Complete Address</label>
+                  <input id="address" name="address" type="text" required
+                    placeholder="e.g. Purok 3, Brgy. Alegria, Alabel"
+                    value={formData.address} onChange={handleChange}
+                    className="w-full border border-sky-200 rounded-xl px-4 py-3 text-navy focus:outline-none focus:ring-2 focus:ring-primary bg-white" />
                 </div>
                 <div>
                   <label htmlFor="service" className="block font-poppins font-semibold text-navy text-sm mb-2">Service Needed</label>
