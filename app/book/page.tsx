@@ -452,6 +452,46 @@ export default function BookPage() {
               </Link>
             </div>
 
+            {/* Payment methods */}
+            <div className="bg-white rounded-2xl p-6 border border-sky-100">
+              <h3 className="font-poppins font-bold text-navy text-base mb-1">We Accept</h3>
+              <p className="text-gray-400 text-xs mb-4">Payment is collected on the day of service.</p>
+              <div className="grid grid-cols-2 gap-3">
+                {/* GCash */}
+                <div className="flex items-center gap-2.5 bg-[#007DFF]/10 border border-[#007DFF]/20 rounded-xl px-4 py-3">
+                  <div className="w-8 h-8 bg-[#007DFF] rounded-lg flex items-center justify-center shrink-0">
+                    <span className="text-white font-poppins font-extrabold text-xs">G</span>
+                  </div>
+                  <span className="font-poppins font-bold text-[#007DFF] text-sm">GCash</span>
+                </div>
+                {/* Maya */}
+                <div className="flex items-center gap-2.5 bg-[#00A94F]/10 border border-[#00A94F]/20 rounded-xl px-4 py-3">
+                  <div className="w-8 h-8 bg-[#00A94F] rounded-lg flex items-center justify-center shrink-0">
+                    <span className="text-white font-poppins font-extrabold text-xs">M</span>
+                  </div>
+                  <span className="font-poppins font-bold text-[#00A94F] text-sm">Maya</span>
+                </div>
+                {/* Credit Card */}
+                <div className="flex items-center gap-2.5 bg-navy/5 border border-navy/10 rounded-xl px-4 py-3">
+                  <div className="w-8 h-8 bg-navy rounded-lg flex items-center justify-center shrink-0">
+                    <svg className="w-4 h-4 text-white" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M20 4H4a2 2 0 00-2 2v12a2 2 0 002 2h16a2 2 0 002-2V6a2 2 0 00-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z"/>
+                    </svg>
+                  </div>
+                  <span className="font-poppins font-bold text-navy text-sm">Credit Card</span>
+                </div>
+                {/* Debit Card */}
+                <div className="flex items-center gap-2.5 bg-navy/5 border border-navy/10 rounded-xl px-4 py-3">
+                  <div className="w-8 h-8 bg-navy rounded-lg flex items-center justify-center shrink-0">
+                    <svg className="w-4 h-4 text-white" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M20 4H4a2 2 0 00-2 2v12a2 2 0 002 2h16a2 2 0 002-2V6a2 2 0 00-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z"/>
+                    </svg>
+                  </div>
+                  <span className="font-poppins font-bold text-navy text-sm">Debit Card</span>
+                </div>
+              </div>
+            </div>
+
             {/* Contact */}
             <div className="bg-white rounded-2xl p-6 border border-sky-100">
               <h3 className="font-poppins font-bold text-navy text-base mb-4">Prefer to talk first?</h3>
