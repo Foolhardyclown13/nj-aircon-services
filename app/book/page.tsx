@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { BUSINESS, SERVICES, SERVICE_AREAS, ADD_ONS } from "@/lib/constants";
@@ -458,18 +459,24 @@ export default function BookPage() {
               <p className="text-gray-400 text-xs mb-4">Payment is collected on the day of service.</p>
               <div className="grid grid-cols-2 gap-3">
                 {/* GCash */}
-                <div className="flex items-center gap-2.5 bg-[#007DFF]/10 border border-[#007DFF]/20 rounded-xl px-4 py-3">
-                  <div className="w-8 h-8 bg-[#007DFF] rounded-lg flex items-center justify-center shrink-0">
-                    <span className="text-white font-poppins font-extrabold text-xs">G</span>
-                  </div>
-                  <span className="font-poppins font-bold text-[#007DFF] text-sm">GCash</span>
+                <div className="flex items-center justify-center bg-white border border-sky-100 rounded-xl px-4 py-3 h-16">
+                  <Image
+                    src="/images/gcash-logo.jpg"
+                    alt="GCash"
+                    width={100}
+                    height={40}
+                    className="object-contain h-8 w-auto"
+                  />
                 </div>
                 {/* Maya */}
-                <div className="flex items-center gap-2.5 bg-[#00A94F]/10 border border-[#00A94F]/20 rounded-xl px-4 py-3">
-                  <div className="w-8 h-8 bg-[#00A94F] rounded-lg flex items-center justify-center shrink-0">
-                    <span className="text-white font-poppins font-extrabold text-xs">M</span>
-                  </div>
-                  <span className="font-poppins font-bold text-[#00A94F] text-sm">Maya</span>
+                <div className="flex items-center justify-center bg-black rounded-xl px-4 py-3 h-16">
+                  <Image
+                    src="/images/maya-logo.png"
+                    alt="Maya"
+                    width={100}
+                    height={40}
+                    className="object-contain h-8 w-auto"
+                  />
                 </div>
                 {/* Credit Card */}
                 <div className="flex items-center gap-2.5 bg-navy/5 border border-navy/10 rounded-xl px-4 py-3">
