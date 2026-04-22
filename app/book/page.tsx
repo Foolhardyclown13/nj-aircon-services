@@ -461,7 +461,7 @@ export default function BookPage() {
                 {/* GCash */}
                 <div className="flex items-center justify-center bg-white border border-sky-100 rounded-xl px-4 py-3 h-16">
                   <Image
-                    src="/images/gcash-logo.jpg"
+                    src="/images/Gcash_Logo.png"
                     alt="GCash"
                     width={100}
                     height={40}
