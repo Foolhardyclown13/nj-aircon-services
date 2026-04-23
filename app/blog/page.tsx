@@ -11,6 +11,15 @@ export const metadata: Metadata = {
 
 const POSTS = [
   {
+    slug: "does-your-aircon-need-gas-top-up-philippines",
+    title: "Does Your Aircon Need a Gas Top-Up? Here's the Truth",
+    excerpt:
+      "Wondering if your aircon needs a gas top-up in the Philippines? Here's when you actually need it, when you don't, and how much it costs in Sarangani Province.",
+    date: "April 24, 2026",
+    readTime: "7 min read",
+    category: "Maintenance Tips",
+  },
+  {
     slug: "regular-clean-vs-deep-clean-vs-preventive-maintenance",
     title: "Window Type vs Split Type Aircon Cleaning: What's the Difference?",
     excerpt:
