@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { SERVICES } from "@/lib/constants";
+import { SERVICE_CATEGORIES } from "@/lib/constants";
 
 export default function Services() {
   return (
@@ -15,27 +15,28 @@ export default function Services() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-3xl mx-auto mb-16">
-          {SERVICES.map((service, index) => (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-16">
+          {SERVICE_CATEGORIES.map((service, index) => (
             <div
               key={service.name}
-              className={`rounded-2xl p-8 flex flex-col gap-4 shadow-md hover:shadow-xl transition-shadow ${
-                index === 1
-                  ? "bg-primary text-white scale-105"
+              className={`rounded-2xl p-7 flex flex-col gap-4 shadow-md hover:shadow-xl transition-shadow ${
+                index === 2
+                  ? "bg-primary text-white"
                   : "bg-light-blue text-navy"
               }`}
             >
+              <span className="text-4xl">{service.icon}</span>
               <div>
                 <h3
-                  className={`font-poppins font-bold text-xl mb-1 ${
-                    index === 1 ? "text-white" : "text-navy"
+                  className={`font-poppins font-bold text-lg mb-1 ${
+                    index === 2 ? "text-white" : "text-navy"
                   }`}
                 >
                   {service.name}
                 </h3>
                 <p
-                  className={`text-sm ${
-                    index === 1 ? "text-sky-100" : "text-gray-500"
+                  className={`text-xs ${
+                    index === 2 ? "text-sky-100" : "text-gray-500"
                   }`}
                 >
                   {service.duration}
@@ -43,26 +44,33 @@ export default function Services() {
               </div>
               <p
                 className={`text-sm leading-relaxed ${
-                  index === 1 ? "text-sky-50" : "text-gray-600"
+                  index === 2 ? "text-sky-50" : "text-gray-600"
                 }`}
               >
                 {service.description}
               </p>
-              <div className="mt-auto">
-                <span
-                  className={`font-poppins font-extrabold text-4xl ${
-                    index === 1 ? "text-white" : "text-primary"
-                  }`}
-                >
-                  ₱{service.price.toLocaleString()}
-                </span>
-                <span
-                  className={`text-sm ml-1 ${
-                    index === 1 ? "text-sky-100" : "text-gray-400"
-                  }`}
-                >
-                  / unit
-                </span>
+
+              {/* Tier pricing */}
+              <div className={`mt-auto rounded-xl overflow-hidden border ${index === 2 ? "border-white/20" : "border-sky-200"}`}>
+                {service.tiers.map((tier, i) => (
+                  <div
+                    key={tier.hp}
+                    className={`flex items-center justify-between px-4 py-2.5 ${
+                      i < service.tiers.length - 1
+                        ? index === 2
+                          ? "border-b border-white/20"
+                          : "border-b border-sky-200"
+                        : ""
+                    } ${index === 2 ? "bg-white/10" : "bg-white/60"}`}
+                  >
+                    <span className={`text-xs font-semibold ${index === 2 ? "text-sky-100" : "text-gray-500"}`}>
+                      {tier.hp}
+                    </span>
+                    <span className={`font-poppins font-extrabold text-lg ${index === 2 ? "text-white" : "text-primary"}`}>
+                      ₱{tier.price.toLocaleString()}
+                    </span>
+                  </div>
+                ))}
               </div>
             </div>
           ))}

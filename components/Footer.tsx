@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { BUSINESS, SERVICE_AREAS, SERVICES, ADD_ONS } from "@/lib/constants";
+import { BUSINESS, SERVICE_AREAS, SERVICE_CATEGORIES, ADD_ONS } from "@/lib/constants";
 
 export default function Footer() {
   const currentYear = new Date().getFullYear();
@@ -33,13 +33,13 @@ export default function Footer() {
           <div>
             <h4 className="font-poppins font-bold text-white mb-4">Services</h4>
             <ul className="flex flex-col gap-2">
-              {SERVICES.map((service) => (
+              {SERVICE_CATEGORIES.map((service) => (
                 <li key={service.name}>
                   <a
                     href="/#services"
                     className="text-gray-400 text-sm hover:text-primary transition-colors"
                   >
-                    {service.name} — ₱{service.price.toLocaleString()}
+                    {service.name} — ₱{service.tiers[0].price.toLocaleString()}+
                   </a>
                 </li>
               ))}

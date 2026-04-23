@@ -3,12 +3,12 @@ import Image from "next/image";
 import Link from "next/link";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import { SERVICES, BUSINESS } from "@/lib/constants";
+import { SERVICE_CATEGORIES, BUSINESS } from "@/lib/constants";
 
 export const metadata: Metadata = {
-  title: "Aircon Cleaning Services | Window Type & Split Type | NJ Aircon Services",
+  title: "Aircon Cleaning Services & Pricing | NJ Aircon Services",
   description:
-    "Professional aircon cleaning for Window Type and Split Type units in Alabel, General Santos City, Malapatan, and Polomolok. Transparent pricing, no hidden charges.",
+    "Window Type and Split Type inverter aircon cleaning in Alabel, General Santos City, Malapatan, and Polomolok. Transparent pricing by HP — no hidden charges.",
 };
 
 export default function ServicesPage() {
@@ -23,8 +23,9 @@ export default function ServicesPage() {
             Our Aircon Cleaning Services
           </h1>
           <p className="text-gray-500 text-lg max-w-2xl mx-auto">
-            Professional aircon cleaning and maintenance for homes and businesses
-            in Alabel, General Santos City, Malapatan, and Polomolok.
+            Professional aircon cleaning for homes and businesses in Alabel,
+            General Santos City, Malapatan, and Polomolok. Priced by unit type
+            and horsepower — no hidden charges.
           </p>
         </div>
       </section>
@@ -32,10 +33,10 @@ export default function ServicesPage() {
       {/* Service cards */}
       <section className="py-20 bg-white">
         <div className="max-w-5xl mx-auto px-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
-            {SERVICES.map((service) => (
-              <div key={service.name} className="bg-light-blue rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-shadow">
-                <div className="relative h-56">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {SERVICE_CATEGORIES.map((service, index) => (
+              <div key={service.name} className="bg-light-blue rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-shadow flex flex-col">
+                <div className="relative h-48">
                   <Image
                     src="/images/ac-cleaning-1.jpg"
                     alt={`${service.name} aircon cleaning service in Alabel and General Santos City`}
@@ -43,29 +44,37 @@ export default function ServicesPage() {
                     className="object-cover"
                   />
                 </div>
-                <div className="p-8">
-                  <div className="flex items-center gap-3 mb-3">
-                    <span className="text-3xl">{service.icon}</span>
-                    <h2 className="font-poppins font-extrabold text-2xl text-navy">
+                <div className="p-7 flex flex-col flex-1">
+                  <div className="flex items-center gap-3 mb-2">
+                    <span className="text-2xl">{service.icon}</span>
+                    <h2 className="font-poppins font-extrabold text-lg text-navy leading-tight">
                       {service.name}
                     </h2>
                   </div>
-                  <p className="text-gray-500 text-sm mb-1">{service.duration}</p>
-                  <p className="text-gray-600 leading-relaxed mb-6">{service.description}</p>
-                  <div className="flex items-end justify-between">
-                    <div>
-                      <span className="font-poppins font-extrabold text-4xl text-primary">
-                        ₱{service.price.toLocaleString()}
-                      </span>
-                      <span className="text-gray-400 text-sm ml-1">/ unit</span>
+                  <p className="text-gray-400 text-xs mb-3">{service.duration}</p>
+                  <p className="text-gray-600 text-sm leading-relaxed mb-6">{service.description}</p>
+
+                  {/* Tier pricing table */}
+                  <div className="mt-auto rounded-xl overflow-hidden border border-sky-200 mb-5">
+                    <div className="bg-navy px-4 py-2">
+                      <p className="text-white text-xs font-poppins font-semibold uppercase tracking-wide">Pricing per unit</p>
                     </div>
-                    <Link
-                      href="/get-a-quote"
-                      className="bg-primary hover:bg-sky-600 text-white font-poppins font-semibold px-5 py-2.5 rounded-xl transition-colors"
-                    >
-                      Book Now
-                    </Link>
+                    {service.tiers.map((tier) => (
+                      <div key={tier.hp} className="flex items-center justify-between px-4 py-3 border-b border-sky-100 last:border-0 bg-white">
+                        <span className="text-gray-500 text-sm">{tier.hp}</span>
+                        <span className="font-poppins font-extrabold text-primary text-xl">
+                          ₱{tier.price.toLocaleString()}
+                        </span>
+                      </div>
+                    ))}
                   </div>
+
+                  <Link
+                    href="/book"
+                    className="block text-center bg-primary hover:bg-sky-600 text-white font-poppins font-semibold px-5 py-3 rounded-xl transition-colors"
+                  >
+                    Book Now
+                  </Link>
                 </div>
               </div>
             ))}
@@ -105,7 +114,7 @@ export default function ServicesPage() {
             Ready to Book a Cleaning?
           </h2>
           <p className="text-gray-500 mb-8">
-            Call us directly or fill out our quote form — we&apos;ll get back to you right away.
+            Call us directly or book online — we&apos;ll get back to you right away.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <a
@@ -115,10 +124,10 @@ export default function ServicesPage() {
               Call {BUSINESS.phone}
             </a>
             <Link
-              href="/get-a-quote"
+              href="/book"
               className="bg-navy hover:bg-slate-800 text-white font-poppins font-bold px-8 py-4 rounded-2xl transition-colors"
             >
-              Get A Quote
+              Book Now
             </Link>
           </div>
         </div>

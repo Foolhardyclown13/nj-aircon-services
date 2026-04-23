@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import { BUSINESS, SERVICES, SERVICE_AREAS, ADD_ONS } from "@/lib/constants";
+import { BUSINESS, SERVICE_CATEGORIES, SERVICE_OPTIONS, SERVICE_AREAS, ADD_ONS } from "@/lib/constants";
 
 const TIME_SLOTS = [
   { value: "09:00", label: "9:00 AM" },
@@ -25,7 +25,7 @@ function buildCalendarUrl(data: {
   addOns: string[];
   message: string;
 }) {
-  const service = SERVICES.find((s) => s.name === data.service);
+  const option = SERVICE_OPTIONS.find((o) => o.value === data.service);
   const units = parseInt(data.units, 10) || 1;
 
   const addOnText = data.addOns.length > 0 ? ` + ${data.addOns.join(", ")}` : "";
@@ -33,8 +33,8 @@ function buildCalendarUrl(data: {
     `Aircon Cleaning – ${data.service}${addOnText} ×${units} | NJ Aircon Services`
   );
 
-  const durationMins = (data.service === "Window Type" ? 45 : 120) * units;
-  const totalPrice = service ? service.price * units : 0;
+  const durationMins = (option?.duration === "2 hrs/unit" ? 120 : 45) * units;
+  const totalPrice = option ? option.price * units : 0;
 
   const timeLabel = TIME_SLOTS.find((t) => t.value === data.preferredTime)?.label ?? "";
 
@@ -138,9 +138,9 @@ export default function GetAQuotePage() {
     setStatus("loading");
 
     const calendarUrl = buildCalendarUrl(formData);
-    const service = SERVICES.find((s) => s.name === formData.service);
+    const option = SERVICE_OPTIONS.find((o) => o.value === formData.service);
     const units = parseInt(formData.units, 10) || 1;
-    const totalPrice = service ? service.price * units : 0;
+    const totalPrice = option ? option.price * units : 0;
 
     try {
       const response = await fetch("https://api.web3forms.com/submit", {
@@ -189,9 +189,9 @@ export default function GetAQuotePage() {
     }
   };
 
-  const selectedService = SERVICES.find((s) => s.name === submittedData?.service);
+  const selectedOption = SERVICE_OPTIONS.find((o) => o.value === submittedData?.service);
   const submittedUnits = parseInt(submittedData?.units ?? "1", 10) || 1;
-  const estimatedPrice = selectedService ? selectedService.price * submittedUnits : 0;
+  const estimatedPrice = selectedOption ? selectedOption.price * submittedUnits : 0;
 
   return (
     <main>
@@ -343,10 +343,14 @@ export default function GetAQuotePage() {
                   <select id="service" name="service" required value={formData.service} onChange={handleChange}
                     className="w-full border border-sky-200 rounded-xl px-4 py-3 text-navy focus:outline-none focus:ring-2 focus:ring-primary bg-white">
                     <option value="">Select a service...</option>
-                    {SERVICES.map((service) => (
-                      <option key={service.name} value={service.name}>
-                        {service.name} — ₱{service.price.toLocaleString()}/unit
-                      </option>
+                    {SERVICE_CATEGORIES.map((cat) => (
+                      <optgroup key={cat.name} label={cat.name}>
+                        {cat.tiers.map((tier) => (
+                          <option key={`${cat.name}-${tier.hp}`} value={`${cat.name} — ${tier.hp}`}>
+                            {tier.hp} — ₱{tier.price.toLocaleString()}
+                          </option>
+                        ))}
+                      </optgroup>
                     ))}
                   </select>
                 </div>
@@ -456,17 +460,21 @@ export default function GetAQuotePage() {
             {/* Pricing summary */}
             <div className="bg-light-blue rounded-2xl p-6 border border-sky-100">
               <h3 className="font-poppins font-bold text-navy text-lg mb-4">Our Rates</h3>
-              {SERVICES.map((service) => (
-                <div key={service.name} className="flex justify-between items-center py-3 border-b border-sky-200 last:border-0">
-                  <div>
-                    <p className="font-poppins font-semibold text-navy text-sm">{service.name}</p>
-                    <p className="text-gray-400 text-xs">{service.duration}</p>
+              <div className="flex flex-col gap-4">
+                {SERVICE_CATEGORIES.map((cat) => (
+                  <div key={cat.name}>
+                    <p className="font-poppins font-semibold text-navy text-sm mb-2">{cat.name}</p>
+                    {cat.tiers.map((tier) => (
+                      <div key={tier.hp} className="flex justify-between items-center py-2 border-b border-sky-200 last:border-0 pl-2">
+                        <span className="text-gray-500 text-xs">{tier.hp}</span>
+                        <span className="font-poppins font-extrabold text-primary text-base">
+                          ₱{tier.price.toLocaleString()}
+                        </span>
+                      </div>
+                    ))}
                   </div>
-                  <span className="font-poppins font-extrabold text-primary text-xl">
-                    ₱{service.price.toLocaleString()}
-                  </span>
-                </div>
-              ))}
+                ))}
+              </div>
               <p className="text-gray-400 text-xs mt-3">* No hidden charges. Price is per unit. Add-ons quoted on assessment.</p>
             </div>
           </div>
