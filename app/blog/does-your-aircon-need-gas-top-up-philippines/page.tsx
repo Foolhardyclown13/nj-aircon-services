@@ -6,23 +6,24 @@ import Footer from "@/components/Footer";
 import { BUSINESS } from "@/lib/constants";
 
 export const metadata: Metadata = {
-  title: "Does Your Aircon Need a Gas Top-Up? Here's the Truth | NJ Aircon Services",
+  title: "Aircon Gas Top-Up Philippines: Do You Really Need One? | NJ Aircon Services",
   description:
-    "Wondering if your aircon needs a gas top-up in the Philippines? Here's when you actually need it, when you don't, and how much it costs in Sarangani Province.",
+    "Is your aircon not cooling? Before spending on a gas top-up, read this. We explain real signs of low refrigerant vs. a dirty unit — and the correct recharge process in General Santos City and Sarangani Province.",
   keywords: [
     "aircon gas top up Philippines",
     "aircon freon recharge Philippines",
     "aircon not cold after cleaning",
     "aircon refrigerant Sarangani",
     "aircon gas top up price Philippines",
+    "aircon gas top up General Santos",
   ],
   alternates: {
     canonical: "https://njairconservices.com/blog/does-your-aircon-need-gas-top-up-philippines",
   },
   openGraph: {
-    title: "Does Your Aircon Need a Gas Top-Up? Here's the Truth | NJ Aircon Services",
+    title: "Aircon Gas Top-Up Philippines: Do You Really Need One? | NJ Aircon Services",
     description:
-      "Wondering if your aircon needs a gas top-up in the Philippines? Here's when you actually need it, when you don't, and how much it costs in Sarangani Province.",
+      "Is your aircon not cooling? Before spending on a gas top-up, read this. We explain real signs of low refrigerant vs. a dirty unit — and the correct recharge process in General Santos City and Sarangani Province.",
     url: "https://njairconservices.com/blog/does-your-aircon-need-gas-top-up-philippines",
     type: "article",
     siteName: "NJ Aircon Services",
@@ -31,7 +32,7 @@ export const metadata: Metadata = {
         url: "https://njairconservices.com/images/blog-gas-top-up.jpg",
         width: 1200,
         height: 630,
-        alt: "NJ Aircon Services technician checking refrigerant levels on Koppel inverter outdoor unit in Sarangani Province",
+        alt: "NJ Aircon Services technician performing refrigerant pressure check on Koppel inverter unit in Alabel, Sarangani Province",
       },
     ],
   },
@@ -40,24 +41,29 @@ export const metadata: Metadata = {
 const blogPostingSchema = {
   "@context": "https://schema.org",
   "@type": "BlogPosting",
-  headline: "Does Your Aircon Need a Gas Top-Up? Here's the Truth",
+  headline: "Aircon Gas Top-Up Philippines: Do You Really Need One?",
   description:
-    "When you actually need a refrigerant top-up, when you don't, and how much it costs in Sarangani Province and General Santos City.",
+    "Learn the real signs of low refrigerant vs. dirty aircon units, the correct recharge process, and gas top-up prices in the Philippines.",
   image: "https://njairconservices.com/images/blog-gas-top-up.jpg",
   datePublished: "2026-04-24",
   dateModified: "2026-04-24",
-  author: { "@type": "Organization", name: "NJ Aircon Services" },
+  author: { "@type": "Organization", name: "NJ Aircon Services", url: "https://njairconservices.com" },
   publisher: {
-    "@type": "Organization",
+    "@type": "LocalBusiness",
     name: "NJ Aircon Services",
-    logo: { "@type": "ImageObject", url: "https://njairconservices.com/images/logo.png" },
+    address: {
+      "@type": "PostalAddress",
+      addressLocality: "Alabel",
+      addressRegion: "Sarangani Province",
+      addressCountry: "PH",
+    },
   },
   mainEntityOfPage: {
     "@type": "WebPage",
     "@id": "https://njairconservices.com/blog/does-your-aircon-need-gas-top-up-philippines",
   },
   keywords:
-    "aircon gas top up Philippines, aircon freon recharge Philippines, aircon not cold after cleaning, aircon refrigerant Sarangani",
+    "aircon gas top up Philippines, aircon freon recharge Philippines, aircon not cold after cleaning, aircon refrigerant Sarangani, aircon gas top up General Santos",
 };
 
 const faqSchema = {
@@ -77,7 +83,7 @@ const faqSchema = {
       name: "Can I top up my aircon gas myself?",
       acceptedAnswer: {
         "@type": "Answer",
-        text: "No — handling refrigerant requires specialized equipment (manifold gauges, vacuum pump) and knowledge of the correct pressure specifications for your unit. Improper handling can damage the compressor, cause injury, or result in illegal venting of refrigerants into the atmosphere. Always use a qualified technician.",
+        text: "No. Handling refrigerant requires specialized equipment (manifold gauges, vacuum pump) and knowledge of the correct pressure specifications. Improper handling can damage the compressor or cause injury.",
       },
     },
     {
@@ -85,7 +91,15 @@ const faqSchema = {
       name: "How often does aircon gas need to be topped up?",
       acceptedAnswer: {
         "@type": "Answer",
-        text: "A properly sealed system should never need topping up. If you need refrigerant more than once every few years, there is a leak that needs to be found and fixed — not just repeatedly topped up.",
+        text: "A properly sealed system should never need topping up. If you need refrigerant more than once every few years, there is a leak that needs to be found and fixed, not just repeatedly topped up.",
+      },
+    },
+    {
+      "@type": "Question",
+      name: "How much does a gas top-up cost in the Philippines?",
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: "R-22 costs approximately PHP 600-900/kg, R-410A costs PHP 1,200-1,800/kg, and R-32 costs PHP 1,000-1,500/kg. A typical residential unit needs 0.5-1kg. Expect to pay PHP 800-2,000 for refrigerant plus the service fee.",
       },
     },
     {
@@ -93,17 +107,19 @@ const faqSchema = {
       name: "What type of gas does my aircon use?",
       acceptedAnswer: {
         "@type": "Answer",
-        text: "Check the sticker on your outdoor unit — it will list the refrigerant type (R-22, R-410A, or R-32). Never mix refrigerant types. Using the wrong gas can permanently damage your compressor.",
+        text: "Check the sticker on your outdoor unit. It will list the refrigerant type (R-22, R-410A, or R-32). Never mix refrigerant types as this can permanently damage your compressor.",
       },
     },
-    {
-      "@type": "Question",
-      name: "Is it expensive to fix a refrigerant leak?",
-      acceptedAnswer: {
-        "@type": "Answer",
-        text: "It depends on where the leak is. A loose connection joint can be tightened and resealed cheaply. A leak in the evaporator coil or copper piping is more involved. Your technician should give you a clear quote after identifying the leak location.",
-      },
-    },
+  ],
+};
+
+const breadcrumbSchema = {
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  itemListElement: [
+    { "@type": "ListItem", position: 1, name: "Home", item: "https://njairconservices.com" },
+    { "@type": "ListItem", position: 2, name: "Blog", item: "https://njairconservices.com/blog" },
+    { "@type": "ListItem", position: 3, name: "Aircon Gas Top-Up Philippines", item: "https://njairconservices.com/blog/does-your-aircon-need-gas-top-up-philippines" },
   ],
 };
 
@@ -112,10 +128,22 @@ export default function BlogPostGasTopUp() {
     <main>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(blogPostingSchema) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />
       <Navbar />
 
       <article className="pt-28 pb-20">
         <div className="max-w-3xl mx-auto px-4">
+
+          {/* Breadcrumb */}
+          <nav aria-label="Breadcrumb" className="mb-6">
+            <ol className="flex items-center gap-2 text-xs text-gray-400">
+              <li><Link href="/" className="hover:text-primary transition-colors">Home</Link></li>
+              <li className="text-gray-300">/</li>
+              <li><Link href="/blog" className="hover:text-primary transition-colors">Blog</Link></li>
+              <li className="text-gray-300">/</li>
+              <li aria-current="page" className="text-gray-500 truncate">Aircon Gas Top-Up Philippines</li>
+            </ol>
+          </nav>
 
           {/* Header */}
           <div className="mb-8">
@@ -123,16 +151,22 @@ export default function BlogPostGasTopUp() {
               Maintenance Tips
             </span>
             <h1 className="font-poppins font-extrabold text-3xl sm:text-4xl text-navy mt-3 mb-4 leading-tight">
-              Does Your Aircon Need a Gas Top-Up? Here&apos;s the Truth
+              Aircon Gas Top-Up in the Philippines: Do You Actually Need One?
             </h1>
-            <p className="text-gray-400 text-sm">April 24, 2026 · 7 min read</p>
+            <p className="text-gray-400 text-sm">
+              By{" "}
+              <Link href="/about" className="hover:text-primary transition-colors font-medium">
+                the NJ Aircon Services Team
+              </Link>{" "}
+              · April 24, 2026 · 7 min read
+            </p>
           </div>
 
           {/* Hero image */}
           <div className="relative h-96 sm:h-[500px] rounded-2xl overflow-hidden shadow-lg mb-10">
             <Image
               src="/images/blog-gas-top-up.jpg"
-              alt="NJ Aircon Services technician checking refrigerant levels on Koppel inverter outdoor unit in Sarangani Province"
+              alt="NJ Aircon Services technician performing refrigerant pressure check on Koppel inverter unit in Alabel, Sarangani Province"
               fill
               className="object-cover"
               priority
@@ -218,6 +252,13 @@ export default function BlogPostGasTopUp() {
                   </div>
                 ))}
               </div>
+              <p className="text-sm text-gray-500 mt-4">
+                If your unit hasn&apos;t been cleaned recently, a{" "}
+                <Link href="/services" className="text-primary hover:underline font-semibold">
+                  professional aircon cleaning
+                </Link>{" "}
+                should always be the first step before considering a refrigerant top-up.
+              </p>
             </div>
 
             {/* Signs that look like low refrigerant but aren't */}
@@ -227,7 +268,10 @@ export default function BlogPostGasTopUp() {
               </h2>
               <p className="leading-relaxed mb-4">
                 Many cooling problems are misdiagnosed as needing a gas top-up when
-                the real cause is something else entirely.
+                the real cause is something else entirely. In our experience servicing
+                units across Sarangani Province and General Santos City, the majority
+                of aircons we&apos;re called out for &ldquo;no cooling&rdquo; turn out to need
+                cleaning, not refrigerant.
               </p>
               <div className="space-y-4">
                 {[
@@ -370,8 +414,11 @@ export default function BlogPostGasTopUp() {
                 How Our Preventive Maintenance Add-On Covers This
               </h2>
               <p className="leading-relaxed mb-4">
-                At NJ Aircon Services, our <strong>Preventive Maintenance</strong> add-on
-                service includes a refrigerant pressure check as part of the full
+                At NJ Aircon Services, our{" "}
+                <Link href="/services" className="text-primary hover:underline font-semibold">
+                  Preventive Maintenance
+                </Link>{" "}
+                add-on service includes a refrigerant pressure check as part of the full
                 inspection. This means:
               </p>
               <ul className="list-disc pl-6 space-y-2 text-gray-600 text-sm mb-4">
@@ -436,7 +483,12 @@ export default function BlogPostGasTopUp() {
                 If your aircon isn&apos;t cooling the way it should — and you want to know
                 if it&apos;s a refrigerant issue, a cleaning issue, or something else — we
                 serve Alabel, General Santos City, Malapatan, and Polomolok. Same-day
-                service available when slots are open.
+                service available when slots are open. If you&apos;re in General Santos City
+                or Sarangani Province and need an aircon gas top-up check, our team is
+                ready to help. You can also{" "}
+                <Link href="/blog" className="text-sky-300 hover:text-white underline transition-colors">
+                  read more aircon maintenance tips on our blog
+                </Link>.
               </p>
               <div className="flex flex-col sm:flex-row gap-3 justify-center">
                 <a
