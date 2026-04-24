@@ -355,7 +355,7 @@ export default function GetAQuotePage() {
                   )}
 
                   <div className="border-t border-sky-100 pt-3 flex justify-between items-center">
-                    <span className="text-gray-500">Estimated Base</span>
+                    <span className="text-gray-500">Total</span>
                     <div className="text-right">
                       <span className="font-poppins font-extrabold text-primary text-lg">
                         ₱{submittedTotalPrice.toLocaleString()}
