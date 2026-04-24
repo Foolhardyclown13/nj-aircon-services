@@ -5,7 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import { BUSINESS, SERVICE_CATEGORIES, SERVICE_OPTIONS, SERVICE_AREAS, ADD_ONS } from "@/lib/constants";
+import { BUSINESS, SERVICE_CATEGORIES, SERVICE_AREAS, ADD_ONS } from "@/lib/constants";
 
 const TIME_SLOTS = [
   { value: "09:00", label: "9:00 AM" },
@@ -16,39 +16,73 @@ const TIME_SLOTS = [
   { value: "16:00", label: "4:00 PM" },
 ];
 
+type ServiceLine = {
+  hp: string;
+  units: number;
+  price: number;
+};
+
+type SelectedServices = Record<string, ServiceLine>;
+
 type FormData = {
   name: string;
   phone: string;
   area: string;
   address: string;
-  service: string;
-  units: string;
+  selectedServices: SelectedServices;
   addOns: string[];
   preferredDate: string;
   preferredTime: string;
   message: string;
 };
 
-function buildCalendarUrl(data: FormData) {
-  const option = SERVICE_OPTIONS.find((o) => o.value === data.service);
-  const units = parseInt(data.units, 10) || 1;
+function getServiceLines(selectedServices: SelectedServices) {
+  return Object.entries(selectedServices).map(([catName, line]) => ({
+    catName,
+    hp: line.hp,
+    units: line.units,
+    price: line.price,
+    subtotal: line.price * line.units,
+  }));
+}
 
+function buildCalendarUrl(data: FormData) {
+  const lines = getServiceLines(data.selectedServices);
+  const totalUnits = lines.reduce((s, l) => s + l.units, 0);
+  const totalPrice = lines.reduce((s, l) => s + l.subtotal, 0);
+
+  const durationMins = lines.reduce((sum, line) => {
+    const cat = SERVICE_CATEGORIES.find((c) => c.name === line.catName);
+    const perUnit = cat?.duration === "2 hrs/unit" ? 120 : 45;
+    return sum + perUnit * line.units;
+  }, 0);
+
+  const serviceShort = lines
+    .map((l) => `${l.catName.split(" ").slice(0, 2).join(" ")} ×${l.units}`)
+    .join(", ");
   const addOnText = data.addOns.length > 0 ? ` + ${data.addOns.join(", ")}` : "";
   const title = encodeURIComponent(
-    `Aircon Cleaning – ${data.service}${addOnText} ×${units} | NJ Aircon Services`
+    `Aircon Cleaning – ${serviceShort}${addOnText} | NJ Aircon Services`
   );
 
-  const durationMins = (option?.duration === "2 hrs/unit" ? 120 : 45) * units;
-  const totalPrice = option ? option.price * units : 0;
+  const serviceDetails = lines
+    .map((l) => `  • ${l.catName} (${l.hp}) ×${l.units} — ₱${l.subtotal.toLocaleString()}`)
+    .join("\n");
 
   const details = encodeURIComponent(
     [
       `📋 SERVICE BREAKDOWN`,
-      `Service: ${data.service}`,
+      serviceDetails,
       data.addOns.length > 0 ? `Add-ons: ${data.addOns.join(", ")}` : "",
-      `Units: ${units}`,
-      `Duration: ~${durationMins >= 60 ? `${Math.floor(durationMins / 60)}h${durationMins % 60 > 0 ? ` ${durationMins % 60}m` : ""}` : `${durationMins} mins`}`,
-      totalPrice > 0 ? `Base Price: ₱${totalPrice.toLocaleString()}${data.addOns.length > 0 ? " (add-ons quoted on assessment)" : ""}` : "",
+      `Total Units: ${totalUnits}`,
+      `Est. Duration: ~${
+        durationMins >= 60
+          ? `${Math.floor(durationMins / 60)}h${durationMins % 60 > 0 ? ` ${durationMins % 60}m` : ""}`
+          : `${durationMins} mins`
+      }`,
+      `Base Price: ₱${totalPrice.toLocaleString()}${
+        data.addOns.length > 0 ? " (add-ons quoted on assessment)" : ""
+      }`,
       ``,
       `📍 LOCATION`,
       data.address ? `Address: ${data.address}` : "",
@@ -67,7 +101,9 @@ function buildCalendarUrl(data: FormData) {
   );
 
   const location = encodeURIComponent(
-    data.address ? `${data.address}, ${data.area}, Philippines` : `${data.area}, Philippines`
+    data.address
+      ? `${data.address}, ${data.area}, Philippines`
+      : `${data.area}, Philippines`
   );
 
   let dates = "";
@@ -98,8 +134,7 @@ const EMPTY_FORM: FormData = {
   phone: "",
   area: "",
   address: "",
-  service: "",
-  units: "1",
+  selectedServices: {},
   addOns: [],
   preferredDate: "",
   preferredTime: "",
@@ -110,6 +145,7 @@ export default function BookPage() {
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [formData, setFormData] = useState<FormData>(EMPTY_FORM);
   const [submittedData, setSubmittedData] = useState<FormData | null>(null);
+  const [serviceError, setServiceError] = useState(false);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
@@ -126,15 +162,62 @@ export default function BookPage() {
     }));
   };
 
+  const toggleService = (catName: string) => {
+    setServiceError(false);
+    setFormData((prev) => {
+      const next = { ...prev.selectedServices };
+      if (next[catName]) {
+        delete next[catName];
+      } else {
+        const cat = SERVICE_CATEGORIES.find((c) => c.name === catName)!;
+        next[catName] = { hp: cat.tiers[0].hp, units: 1, price: cat.tiers[0].price };
+      }
+      return { ...prev, selectedServices: next };
+    });
+  };
+
+  const updateServiceHp = (catName: string, hp: string) => {
+    const cat = SERVICE_CATEGORIES.find((c) => c.name === catName)!;
+    const tier = cat.tiers.find((t) => t.hp === hp)!;
+    setFormData((prev) => ({
+      ...prev,
+      selectedServices: {
+        ...prev.selectedServices,
+        [catName]: { ...prev.selectedServices[catName], hp, price: tier.price },
+      },
+    }));
+  };
+
+  const updateServiceUnits = (catName: string, units: number) => {
+    setFormData((prev) => ({
+      ...prev,
+      selectedServices: {
+        ...prev.selectedServices,
+        [catName]: { ...prev.selectedServices[catName], units: Math.max(1, units) },
+      },
+    }));
+  };
+
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+
+    if (Object.keys(formData.selectedServices).length === 0) {
+      setServiceError(true);
+      return;
+    }
+
     setStatus("loading");
 
+    const lines = getServiceLines(formData.selectedServices);
+    const totalUnits = lines.reduce((s, l) => s + l.units, 0);
+    const totalPrice = lines.reduce((s, l) => s + l.subtotal, 0);
     const calendarUrl = buildCalendarUrl(formData);
-    const option = SERVICE_OPTIONS.find((o) => o.value === formData.service);
-    const units = parseInt(formData.units, 10) || 1;
-    const totalPrice = option ? option.price * units : 0;
-    const timeLabel = TIME_SLOTS.find((t) => t.value === formData.preferredTime)?.label ?? "Not specified";
+    const timeLabel =
+      TIME_SLOTS.find((t) => t.value === formData.preferredTime)?.label ?? "Not specified";
+
+    const servicesText = lines
+      .map((l) => `${l.catName} (${l.hp}) ×${l.units} — ₱${l.subtotal.toLocaleString()}`)
+      .join("; ");
 
     try {
       const response = await fetch("https://api.web3forms.com/submit", {
@@ -142,15 +225,15 @@ export default function BookPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           access_key: process.env.NEXT_PUBLIC_WEB3FORMS_KEY,
-          subject: `New Booking — ${formData.name} | ${formData.service} ×${formData.units} | ${formData.area}`,
+          subject: `New Booking — ${formData.name} | ${totalUnits} unit${totalUnits !== 1 ? "s" : ""} | ${formData.area}`,
           name: formData.name,
           phone: formData.phone,
           area: formData.area,
           address: formData.address,
-          service: formData.service,
+          services: servicesText,
           addOns: formData.addOns.length > 0 ? formData.addOns.join(", ") : "None",
-          units: formData.units,
-          estimatedBasePrice: totalPrice > 0 ? `₱${totalPrice.toLocaleString()}` : "—",
+          totalUnits: String(totalUnits),
+          estimatedBasePrice: `₱${totalPrice.toLocaleString()}`,
           preferredDate: formData.preferredDate || "Not specified",
           preferredTime: timeLabel,
           message: formData.message || "—",
@@ -170,9 +253,14 @@ export default function BookPage() {
     }
   };
 
-  const selectedOption = SERVICE_OPTIONS.find((o) => o.value === submittedData?.service);
-  const submittedUnits = parseInt(submittedData?.units ?? "1", 10) || 1;
-  const estimatedPrice = selectedOption ? selectedOption.price * submittedUnits : 0;
+  const submittedLines = submittedData
+    ? getServiceLines(submittedData.selectedServices)
+    : [];
+  const submittedTotalPrice = submittedLines.reduce((s, l) => s + l.subtotal, 0);
+  const submittedTotalUnits = submittedLines.reduce((s, l) => s + l.units, 0);
+
+  const liveLines = getServiceLines(formData.selectedServices);
+  const liveTotalPrice = liveLines.reduce((s, l) => s + l.subtotal, 0);
 
   return (
     <main>
@@ -208,32 +296,50 @@ export default function BookPage() {
                 {/* Booking summary */}
                 <div className="bg-white rounded-xl border border-sky-100 p-5 flex flex-col gap-3 text-sm">
                   <p className="font-poppins font-bold text-navy text-base mb-1">Booking Summary</p>
-                  <div className="flex justify-between">
-                    <span className="text-gray-500">Service</span>
-                    <span className="font-semibold text-navy">{submittedData.service}</span>
+
+                  {/* Service lines */}
+                  <div className="flex flex-col gap-2">
+                    {submittedLines.map((l) => (
+                      <div key={l.catName} className="flex justify-between items-start">
+                        <div>
+                          <p className="font-semibold text-navy text-sm">{l.catName}</p>
+                          <p className="text-gray-400 text-xs">{l.hp} · {l.units} unit{l.units !== 1 ? "s" : ""}</p>
+                        </div>
+                        <span className="font-semibold text-navy shrink-0 ml-4">
+                          ₱{l.subtotal.toLocaleString()}
+                        </span>
+                      </div>
+                    ))}
                   </div>
+
                   {submittedData.addOns.length > 0 && (
-                    <div className="flex justify-between">
+                    <div className="flex justify-between pt-1">
                       <span className="text-gray-500">Add-ons</span>
                       <span className="font-semibold text-navy text-right max-w-[60%]">
                         {submittedData.addOns.join(", ")}
                       </span>
                     </div>
                   )}
+
                   <div className="flex justify-between">
-                    <span className="text-gray-500">Units</span>
-                    <span className="font-semibold text-navy">{submittedData.units}</span>
+                    <span className="text-gray-500">Total Units</span>
+                    <span className="font-semibold text-navy">{submittedTotalUnits}</span>
                   </div>
+
                   <div className="flex justify-between">
                     <span className="text-gray-500">Area</span>
                     <span className="font-semibold text-navy">{submittedData.area}</span>
                   </div>
+
                   {submittedData.address && (
                     <div className="flex justify-between">
                       <span className="text-gray-500">Address</span>
-                      <span className="font-semibold text-navy text-right max-w-[60%]">{submittedData.address}</span>
+                      <span className="font-semibold text-navy text-right max-w-[60%]">
+                        {submittedData.address}
+                      </span>
                     </div>
                   )}
+
                   {submittedData.preferredDate && (
                     <div className="flex justify-between">
                       <span className="text-gray-500">Preferred Date</span>
@@ -249,11 +355,12 @@ export default function BookPage() {
                       </span>
                     </div>
                   )}
+
                   <div className="border-t border-sky-100 pt-3 flex justify-between items-center">
                     <span className="text-gray-500">Base Price</span>
                     <div className="text-right">
                       <span className="font-poppins font-extrabold text-primary text-lg">
-                        ₱{estimatedPrice.toLocaleString()}
+                        ₱{submittedTotalPrice.toLocaleString()}
                       </span>
                       {submittedData.addOns.length > 0 && (
                         <p className="text-gray-400 text-xs">+ add-ons quoted on assessment</p>
@@ -322,29 +429,97 @@ export default function BookPage() {
                     className="w-full border border-sky-200 rounded-xl px-4 py-3 text-navy focus:outline-none focus:ring-2 focus:ring-primary bg-white" />
                 </div>
 
+                {/* Multi-service selector */}
                 <div>
-                  <label htmlFor="service" className="block font-poppins font-semibold text-navy text-sm mb-2">Service</label>
-                  <select id="service" name="service" required value={formData.service} onChange={handleChange}
-                    className="w-full border border-sky-200 rounded-xl px-4 py-3 text-navy focus:outline-none focus:ring-2 focus:ring-primary bg-white">
-                    <option value="">Select a service...</option>
-                    {SERVICE_CATEGORIES.map((cat) => (
-                      <optgroup key={cat.name} label={cat.name}>
-                        {cat.tiers.map((tier) => (
-                          <option key={`${cat.name}-${tier.hp}`} value={`${cat.name} — ${tier.hp}`}>
-                            {tier.hp} — ₱{tier.price.toLocaleString()}
-                          </option>
-                        ))}
-                      </optgroup>
-                    ))}
-                  </select>
-                </div>
+                  <p className="font-poppins font-semibold text-navy text-sm mb-1">
+                    Services <span className="text-red-500">*</span>
+                  </p>
+                  <p className="text-gray-400 text-xs mb-3">Select all aircon types you need cleaned. You can mix and match.</p>
+                  <div className="flex flex-col gap-3">
+                    {SERVICE_CATEGORIES.map((cat) => {
+                      const isSelected = !!formData.selectedServices[cat.name];
+                      const line = formData.selectedServices[cat.name];
+                      return (
+                        <div
+                          key={cat.name}
+                          className={`bg-white border rounded-xl overflow-hidden transition-colors ${
+                            isSelected ? "border-primary" : "border-sky-200"
+                          }`}
+                        >
+                          <label className="flex items-center gap-3 px-4 py-3 cursor-pointer select-none">
+                            <input
+                              type="checkbox"
+                              checked={isSelected}
+                              onChange={() => toggleService(cat.name)}
+                              className="accent-primary w-4 h-4 shrink-0"
+                            />
+                            <div className="flex-1 min-w-0">
+                              <p className="font-poppins font-semibold text-navy text-sm">{cat.name}</p>
+                              <p className="text-gray-400 text-xs">
+                                {cat.tiers[0].hp}: ₱{cat.tiers[0].price.toLocaleString()} &nbsp;·&nbsp;
+                                {cat.tiers[1].hp}: ₱{cat.tiers[1].price.toLocaleString()}
+                              </p>
+                            </div>
+                          </label>
+                          {isSelected && line && (
+                            <div className="px-4 pb-4 pt-2 border-t border-sky-100 bg-sky-50/50 flex gap-3">
+                              <div className="flex-1">
+                                <label className="block text-xs font-semibold text-gray-500 mb-1.5">HP Size</label>
+                                <select
+                                  value={line.hp}
+                                  onChange={(e) => updateServiceHp(cat.name, e.target.value)}
+                                  className="w-full border border-sky-200 rounded-lg px-3 py-2 text-navy text-sm focus:outline-none focus:ring-2 focus:ring-primary bg-white"
+                                >
+                                  {cat.tiers.map((tier) => (
+                                    <option key={tier.hp} value={tier.hp}>
+                                      {tier.hp} — ₱{tier.price.toLocaleString()}
+                                    </option>
+                                  ))}
+                                </select>
+                              </div>
+                              <div className="w-24">
+                                <label className="block text-xs font-semibold text-gray-500 mb-1.5">Units</label>
+                                <input
+                                  type="number"
+                                  min="1"
+                                  max="5"
+                                  value={line.units}
+                                  onChange={(e) =>
+                                    updateServiceUnits(cat.name, parseInt(e.target.value, 10) || 1)
+                                  }
+                                  className="w-full border border-sky-200 rounded-lg px-3 py-2 text-navy text-sm focus:outline-none focus:ring-2 focus:ring-primary bg-white"
+                                />
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
 
-                <div>
-                  <label htmlFor="units" className="block font-poppins font-semibold text-navy text-sm mb-2">Number of Units</label>
-                  <input id="units" name="units" type="number" min="1" max="5" required
-                    value={formData.units} onChange={handleChange}
-                    className="w-full border border-sky-200 rounded-xl px-4 py-3 text-navy focus:outline-none focus:ring-2 focus:ring-primary bg-white" />
-                  <p className="text-gray-400 text-xs mt-1.5">
+                  {serviceError && (
+                    <p className="text-red-500 text-xs mt-2">Please select at least one service.</p>
+                  )}
+
+                  {/* Live price summary */}
+                  {liveLines.length > 0 && (
+                    <div className="mt-3 bg-white border border-sky-200 rounded-xl px-4 py-3 flex flex-col gap-1.5 text-sm">
+                      {liveLines.map((l) => (
+                        <div key={l.catName} className="flex justify-between text-xs text-gray-500">
+                          <span>{l.catName} ({l.hp}) ×{l.units}</span>
+                          <span className="font-semibold text-navy">₱{l.subtotal.toLocaleString()}</span>
+                        </div>
+                      ))}
+                      <div className="border-t border-sky-100 pt-2 flex justify-between">
+                        <span className="font-poppins font-semibold text-navy text-xs">Estimated Total</span>
+                        <span className="font-poppins font-extrabold text-primary text-sm">
+                          ₱{liveTotalPrice.toLocaleString()}
+                        </span>
+                      </div>
+                    </div>
+                  )}
+
+                  <p className="text-gray-400 text-xs mt-2">
                     For 6 or more units,{" "}
                     <Link href="/get-a-quote" className="text-primary hover:underline font-semibold">
                       request a quote instead
@@ -466,7 +641,6 @@ export default function BookPage() {
               <h3 className="font-poppins font-bold text-navy text-base mb-1">We Accept</h3>
               <p className="text-gray-400 text-xs mb-4">Payment is collected on the day of service.</p>
               <div className="grid grid-cols-2 gap-3">
-                {/* GCash */}
                 <div className="flex items-center justify-center bg-white border border-sky-100 rounded-xl px-4 py-3 h-16">
                   <Image
                     src="/images/Gcash_Logo.png"
@@ -476,7 +650,6 @@ export default function BookPage() {
                     className="object-contain h-8 w-auto"
                   />
                 </div>
-                {/* Maya */}
                 <div className="flex items-center justify-center bg-black rounded-xl px-4 py-3 h-16">
                   <Image
                     src="/images/maya-logo.png"
@@ -486,7 +659,6 @@ export default function BookPage() {
                     className="object-contain h-8 w-auto"
                   />
                 </div>
-                {/* Credit Card */}
                 <div className="flex items-center gap-2.5 bg-navy/5 border border-navy/10 rounded-xl px-4 py-3">
                   <div className="w-8 h-8 bg-navy rounded-lg flex items-center justify-center shrink-0">
                     <svg className="w-4 h-4 text-white" viewBox="0 0 24 24" fill="currentColor">
@@ -495,7 +667,6 @@ export default function BookPage() {
                   </div>
                   <span className="font-poppins font-bold text-navy text-sm">Credit Card</span>
                 </div>
-                {/* Debit Card */}
                 <div className="flex items-center gap-2.5 bg-navy/5 border border-navy/10 rounded-xl px-4 py-3">
                   <div className="w-8 h-8 bg-navy rounded-lg flex items-center justify-center shrink-0">
                     <svg className="w-4 h-4 text-white" viewBox="0 0 24 24" fill="currentColor">

@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import { BUSINESS, SERVICE_CATEGORIES, SERVICE_OPTIONS, SERVICE_AREAS, ADD_ONS } from "@/lib/constants";
+import { BUSINESS, SERVICE_CATEGORIES, SERVICE_AREAS, ADD_ONS } from "@/lib/constants";
 
 const TIME_SLOTS = [
   { value: "09:00", label: "9:00 AM" },
@@ -14,38 +14,71 @@ const TIME_SLOTS = [
   { value: "16:00", label: "4:00 PM" },
 ];
 
-function buildCalendarUrl(data: {
+type ServiceLine = {
+  hp: string;
+  units: number;
+  price: number;
+};
+
+type SelectedServices = Record<string, ServiceLine>;
+
+type FormData = {
   name: string;
-  service: string;
-  units: string;
+  phone: string;
   area: string;
   address: string;
+  selectedServices: SelectedServices;
+  addOns: string[];
   preferredDate: string;
   preferredTime: string;
-  addOns: string[];
   message: string;
-}) {
-  const option = SERVICE_OPTIONS.find((o) => o.value === data.service);
-  const units = parseInt(data.units, 10) || 1;
+};
 
+function getServiceLines(selectedServices: SelectedServices) {
+  return Object.entries(selectedServices).map(([catName, line]) => ({
+    catName,
+    hp: line.hp,
+    units: line.units,
+    price: line.price,
+    subtotal: line.price * line.units,
+  }));
+}
+
+function buildCalendarUrl(data: FormData) {
+  const lines = getServiceLines(data.selectedServices);
+  const totalUnits = lines.reduce((s, l) => s + l.units, 0);
+  const totalPrice = lines.reduce((s, l) => s + l.subtotal, 0);
+
+  const durationMins = lines.reduce((sum, line) => {
+    const cat = SERVICE_CATEGORIES.find((c) => c.name === line.catName);
+    const perUnit = cat?.duration === "2 hrs/unit" ? 120 : 45;
+    return sum + perUnit * line.units;
+  }, 0);
+
+  const serviceShort = lines
+    .map((l) => `${l.catName.split(" ").slice(0, 2).join(" ")} ×${l.units}`)
+    .join(", ");
   const addOnText = data.addOns.length > 0 ? ` + ${data.addOns.join(", ")}` : "";
   const title = encodeURIComponent(
-    `Aircon Cleaning – ${data.service}${addOnText} ×${units} | NJ Aircon Services`
+    `Aircon Cleaning Quote – ${serviceShort}${addOnText} | NJ Aircon Services`
   );
 
-  const durationMins = (option?.duration === "2 hrs/unit" ? 120 : 45) * units;
-  const totalPrice = option ? option.price * units : 0;
-
-  const timeLabel = TIME_SLOTS.find((t) => t.value === data.preferredTime)?.label ?? "";
+  const serviceDetails = lines
+    .map((l) => `  • ${l.catName} (${l.hp}) ×${l.units} — ₱${l.subtotal.toLocaleString()}`)
+    .join("\n");
 
   const details = encodeURIComponent(
     [
       `📋 SERVICE BREAKDOWN`,
-      `Service: ${data.service}`,
+      serviceDetails,
       data.addOns.length > 0 ? `Add-ons: ${data.addOns.join(", ")}` : "",
-      `Units: ${units}`,
-      `Duration: ~${durationMins >= 60 ? `${Math.floor(durationMins / 60)}h${durationMins % 60 > 0 ? ` ${durationMins % 60}m` : ""}` : `${durationMins} mins`}`,
-      totalPrice > 0 ? `Base Price: ₱${totalPrice.toLocaleString()} (add-ons quoted on assessment)` : "",
+      `Total Units: ${totalUnits}`,
+      `Est. Duration: ~${
+        durationMins >= 60
+          ? `${Math.floor(durationMins / 60)}h${durationMins % 60 > 0 ? ` ${durationMins % 60}m` : ""}`
+          : `${durationMins} mins`
+      }`,
+      `Estimated Base Price: ₱${totalPrice.toLocaleString()} (final quote pending inspection)`,
       ``,
       `📍 LOCATION`,
       data.address ? `Address: ${data.address}` : "",
@@ -53,6 +86,7 @@ function buildCalendarUrl(data: {
       ``,
       `👤 CUSTOMER`,
       `Name: ${data.name}`,
+      `Phone: ${data.phone}`,
       data.message ? `Notes: ${data.message}` : "",
       ``,
       `📞 NJ Aircon Services`,
@@ -62,11 +96,14 @@ function buildCalendarUrl(data: {
       .join("\n")
   );
 
-  const location = encodeURIComponent(data.address ? `${data.address}, ${data.area}, Philippines` : `${data.area}, Philippines`);
+  const location = encodeURIComponent(
+    data.address
+      ? `${data.address}, ${data.area}, Philippines`
+      : `${data.area}, Philippines`
+  );
 
   let dates = "";
   if (data.preferredDate && data.preferredTime) {
-    // Timed event: start at chosen time, end after estimated duration
     const [startH, startM] = data.preferredTime.split(":").map(Number);
     const start = new Date(`${data.preferredDate}T00:00:00`);
     start.setHours(startH, startM, 0);
@@ -75,7 +112,6 @@ function buildCalendarUrl(data: {
       `${dt.getFullYear()}${String(dt.getMonth() + 1).padStart(2, "0")}${String(dt.getDate()).padStart(2, "0")}T${String(dt.getHours()).padStart(2, "0")}${String(dt.getMinutes()).padStart(2, "0")}00`;
     dates = `${fmtDateTime(start)}/${fmtDateTime(end)}`;
   } else if (data.preferredDate) {
-    // All-day fallback if no time chosen
     const d = new Date(data.preferredDate + "T00:00:00");
     const next = new Date(d);
     next.setDate(next.getDate() + 1);
@@ -89,34 +125,23 @@ function buildCalendarUrl(data: {
   return url;
 }
 
-type FormData = {
-  name: string;
-  phone: string;
-  area: string;
-  address: string;
-  service: string;
-  units: string;
-  addOns: string[];
-  preferredDate: string;
-  preferredTime: string;
-  message: string;
+const EMPTY_FORM: FormData = {
+  name: "",
+  phone: "",
+  area: "",
+  address: "",
+  selectedServices: {},
+  addOns: [],
+  preferredDate: "",
+  preferredTime: "",
+  message: "",
 };
 
 export default function GetAQuotePage() {
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
-  const [formData, setFormData] = useState<FormData>({
-    name: "",
-    phone: "",
-    area: "",
-    address: "",
-    service: "",
-    units: "1",
-    addOns: [],
-    preferredDate: "",
-    preferredTime: "",
-    message: "",
-  });
+  const [formData, setFormData] = useState<FormData>(EMPTY_FORM);
   const [submittedData, setSubmittedData] = useState<FormData | null>(null);
+  const [serviceError, setServiceError] = useState(false);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
@@ -133,14 +158,62 @@ export default function GetAQuotePage() {
     }));
   };
 
+  const toggleService = (catName: string) => {
+    setServiceError(false);
+    setFormData((prev) => {
+      const next = { ...prev.selectedServices };
+      if (next[catName]) {
+        delete next[catName];
+      } else {
+        const cat = SERVICE_CATEGORIES.find((c) => c.name === catName)!;
+        next[catName] = { hp: cat.tiers[0].hp, units: 1, price: cat.tiers[0].price };
+      }
+      return { ...prev, selectedServices: next };
+    });
+  };
+
+  const updateServiceHp = (catName: string, hp: string) => {
+    const cat = SERVICE_CATEGORIES.find((c) => c.name === catName)!;
+    const tier = cat.tiers.find((t) => t.hp === hp)!;
+    setFormData((prev) => ({
+      ...prev,
+      selectedServices: {
+        ...prev.selectedServices,
+        [catName]: { ...prev.selectedServices[catName], hp, price: tier.price },
+      },
+    }));
+  };
+
+  const updateServiceUnits = (catName: string, units: number) => {
+    setFormData((prev) => ({
+      ...prev,
+      selectedServices: {
+        ...prev.selectedServices,
+        [catName]: { ...prev.selectedServices[catName], units: Math.max(1, units) },
+      },
+    }));
+  };
+
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+
+    if (Object.keys(formData.selectedServices).length === 0) {
+      setServiceError(true);
+      return;
+    }
+
     setStatus("loading");
 
+    const lines = getServiceLines(formData.selectedServices);
+    const totalUnits = lines.reduce((s, l) => s + l.units, 0);
+    const totalPrice = lines.reduce((s, l) => s + l.subtotal, 0);
     const calendarUrl = buildCalendarUrl(formData);
-    const option = SERVICE_OPTIONS.find((o) => o.value === formData.service);
-    const units = parseInt(formData.units, 10) || 1;
-    const totalPrice = option ? option.price * units : 0;
+    const timeLabel =
+      TIME_SLOTS.find((t) => t.value === formData.preferredTime)?.label ?? "Not specified";
+
+    const servicesText = lines
+      .map((l) => `${l.catName} (${l.hp}) ×${l.units} — ₱${l.subtotal.toLocaleString()}`)
+      .join("; ");
 
     try {
       const response = await fetch("https://api.web3forms.com/submit", {
@@ -148,19 +221,17 @@ export default function GetAQuotePage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           access_key: process.env.NEXT_PUBLIC_WEB3FORMS_KEY,
-          subject: `Quote Request — ${formData.name} | ${formData.service} ×${formData.units} | ${formData.area}`,
+          subject: `Quote Request — ${formData.name} | ${totalUnits} unit${totalUnits !== 1 ? "s" : ""} | ${formData.area}`,
           name: formData.name,
           phone: formData.phone,
           area: formData.area,
           address: formData.address,
-          service: formData.service,
+          services: servicesText,
           addOns: formData.addOns.length > 0 ? formData.addOns.join(", ") : "None",
-          units: formData.units,
+          totalUnits: String(totalUnits),
+          estimatedBasePrice: `₱${totalPrice.toLocaleString()} (pending inspection)`,
           preferredDate: formData.preferredDate || "Not specified",
-          preferredTime: formData.preferredTime
-            ? (TIME_SLOTS.find((t) => t.value === formData.preferredTime)?.label ?? formData.preferredTime)
-            : "Not specified",
-          estimatedBasePrice: totalPrice > 0 ? `₱${totalPrice.toLocaleString()}` : "—",
+          preferredTime: timeLabel,
           message: formData.message || "—",
           addToCalendar: calendarUrl,
         }),
@@ -169,18 +240,7 @@ export default function GetAQuotePage() {
       if (data.success) {
         setSubmittedData(formData);
         setStatus("success");
-        setFormData({
-          name: "",
-          phone: "",
-          area: "",
-          address: "",
-          service: "",
-          units: "1",
-          addOns: [],
-          preferredDate: "",
-          preferredTime: "",
-          message: "",
-        });
+        setFormData(EMPTY_FORM);
       } else {
         setStatus("error");
       }
@@ -189,9 +249,14 @@ export default function GetAQuotePage() {
     }
   };
 
-  const selectedOption = SERVICE_OPTIONS.find((o) => o.value === submittedData?.service);
-  const submittedUnits = parseInt(submittedData?.units ?? "1", 10) || 1;
-  const estimatedPrice = selectedOption ? selectedOption.price * submittedUnits : 0;
+  const submittedLines = submittedData
+    ? getServiceLines(submittedData.selectedServices)
+    : [];
+  const submittedTotalPrice = submittedLines.reduce((s, l) => s + l.subtotal, 0);
+  const submittedTotalUnits = submittedLines.reduce((s, l) => s + l.units, 0);
+
+  const liveLines = getServiceLines(formData.selectedServices);
+  const liveTotalPrice = liveLines.reduce((s, l) => s + l.subtotal, 0);
 
   return (
     <main>
@@ -229,33 +294,50 @@ export default function GetAQuotePage() {
 
                 {/* Booking summary */}
                 <div className="bg-white rounded-xl border border-sky-100 p-5 flex flex-col gap-3 text-sm">
-                  <p className="font-poppins font-bold text-navy text-base mb-1">Your Booking Summary</p>
-                  <div className="flex justify-between">
-                    <span className="text-gray-500">Service</span>
-                    <span className="font-semibold text-navy">{submittedData.service}</span>
+                  <p className="font-poppins font-bold text-navy text-base mb-1">Your Quote Request</p>
+
+                  <div className="flex flex-col gap-2">
+                    {submittedLines.map((l) => (
+                      <div key={l.catName} className="flex justify-between items-start">
+                        <div>
+                          <p className="font-semibold text-navy text-sm">{l.catName}</p>
+                          <p className="text-gray-400 text-xs">{l.hp} · {l.units} unit{l.units !== 1 ? "s" : ""}</p>
+                        </div>
+                        <span className="font-semibold text-navy shrink-0 ml-4">
+                          ₱{l.subtotal.toLocaleString()}
+                        </span>
+                      </div>
+                    ))}
                   </div>
+
                   {submittedData.addOns.length > 0 && (
-                    <div className="flex justify-between">
+                    <div className="flex justify-between pt-1">
                       <span className="text-gray-500">Add-ons</span>
                       <span className="font-semibold text-navy text-right max-w-[60%]">
                         {submittedData.addOns.join(", ")}
                       </span>
                     </div>
                   )}
+
                   <div className="flex justify-between">
-                    <span className="text-gray-500">Units</span>
-                    <span className="font-semibold text-navy">{submittedData.units}</span>
+                    <span className="text-gray-500">Total Units</span>
+                    <span className="font-semibold text-navy">{submittedTotalUnits}</span>
                   </div>
+
                   <div className="flex justify-between">
                     <span className="text-gray-500">Area</span>
                     <span className="font-semibold text-navy">{submittedData.area}</span>
                   </div>
+
                   {submittedData.address && (
                     <div className="flex justify-between">
                       <span className="text-gray-500">Address</span>
-                      <span className="font-semibold text-navy text-right max-w-[60%]">{submittedData.address}</span>
+                      <span className="font-semibold text-navy text-right max-w-[60%]">
+                        {submittedData.address}
+                      </span>
                     </div>
                   )}
+
                   {submittedData.preferredDate && (
                     <div className="flex justify-between">
                       <span className="text-gray-500">Preferred Date</span>
@@ -271,14 +353,15 @@ export default function GetAQuotePage() {
                       </span>
                     </div>
                   )}
+
                   <div className="border-t border-sky-100 pt-3 flex justify-between items-center">
-                    <span className="text-gray-500">Base Price</span>
-                    <span className="font-poppins font-extrabold text-primary text-lg">
-                      ₱{estimatedPrice.toLocaleString()}
-                      <span className="text-gray-400 font-normal text-xs ml-1">
-                        {submittedData.addOns.length > 0 ? "+ add-ons (quoted on assessment)" : ""}
+                    <span className="text-gray-500">Estimated Base</span>
+                    <div className="text-right">
+                      <span className="font-poppins font-extrabold text-primary text-lg">
+                        ₱{submittedTotalPrice.toLocaleString()}
                       </span>
-                    </span>
+                      <p className="text-gray-400 text-xs">final quote after inspection</p>
+                    </div>
                   </div>
                 </div>
 
@@ -300,7 +383,7 @@ export default function GetAQuotePage() {
                 </p>
 
                 <button
-                  onClick={() => { setStatus("idle"); setSubmittedData(null); setFormData({ name: "", phone: "", area: "", address: "", service: "", units: "1", addOns: [], preferredDate: "", preferredTime: "", message: "" }); }}
+                  onClick={() => { setStatus("idle"); setSubmittedData(null); }}
                   className="text-primary font-semibold hover:underline text-sm text-center"
                 >
                   Submit another request
@@ -314,12 +397,14 @@ export default function GetAQuotePage() {
                     value={formData.name} onChange={handleChange}
                     className="w-full border border-sky-200 rounded-xl px-4 py-3 text-navy focus:outline-none focus:ring-2 focus:ring-primary bg-white" />
                 </div>
+
                 <div>
                   <label htmlFor="phone" className="block font-poppins font-semibold text-navy text-sm mb-2">Phone Number</label>
                   <input id="phone" name="phone" type="tel" required placeholder="09XX-XXX-XXXX"
                     value={formData.phone} onChange={handleChange}
                     className="w-full border border-sky-200 rounded-xl px-4 py-3 text-navy focus:outline-none focus:ring-2 focus:ring-primary bg-white" />
                 </div>
+
                 <div>
                   <label htmlFor="area" className="block font-poppins font-semibold text-navy text-sm mb-2">Your Area</label>
                   <select id="area" name="area" required value={formData.area} onChange={handleChange}
@@ -331,6 +416,7 @@ export default function GetAQuotePage() {
                     <option value="Other">Other</option>
                   </select>
                 </div>
+
                 <div>
                   <label htmlFor="address" className="block font-poppins font-semibold text-navy text-sm mb-2">Complete Address</label>
                   <input id="address" name="address" type="text" required
@@ -338,32 +424,104 @@ export default function GetAQuotePage() {
                     value={formData.address} onChange={handleChange}
                     className="w-full border border-sky-200 rounded-xl px-4 py-3 text-navy focus:outline-none focus:ring-2 focus:ring-primary bg-white" />
                 </div>
+
+                {/* Multi-service selector */}
                 <div>
-                  <label htmlFor="service" className="block font-poppins font-semibold text-navy text-sm mb-2">Service Needed</label>
-                  <select id="service" name="service" required value={formData.service} onChange={handleChange}
-                    className="w-full border border-sky-200 rounded-xl px-4 py-3 text-navy focus:outline-none focus:ring-2 focus:ring-primary bg-white">
-                    <option value="">Select a service...</option>
-                    {SERVICE_CATEGORIES.map((cat) => (
-                      <optgroup key={cat.name} label={cat.name}>
-                        {cat.tiers.map((tier) => (
-                          <option key={`${cat.name}-${tier.hp}`} value={`${cat.name} — ${tier.hp}`}>
-                            {tier.hp} — ₱{tier.price.toLocaleString()}
-                          </option>
-                        ))}
-                      </optgroup>
-                    ))}
-                  </select>
-                </div>
-                <div>
-                  <label htmlFor="units" className="block font-poppins font-semibold text-navy text-sm mb-2">Number of Units</label>
-                  <input id="units" name="units" type="number" min="1" max="20" required
-                    value={formData.units} onChange={handleChange}
-                    className="w-full border border-sky-200 rounded-xl px-4 py-3 text-navy focus:outline-none focus:ring-2 focus:ring-primary bg-white" />
+                  <p className="font-poppins font-semibold text-navy text-sm mb-1">
+                    Services Needed <span className="text-red-500">*</span>
+                  </p>
+                  <p className="text-gray-400 text-xs mb-3">Select all aircon types that need cleaning. You can mix and match.</p>
+                  <div className="flex flex-col gap-3">
+                    {SERVICE_CATEGORIES.map((cat) => {
+                      const isSelected = !!formData.selectedServices[cat.name];
+                      const line = formData.selectedServices[cat.name];
+                      return (
+                        <div
+                          key={cat.name}
+                          className={`bg-white border rounded-xl overflow-hidden transition-colors ${
+                            isSelected ? "border-primary" : "border-sky-200"
+                          }`}
+                        >
+                          <label className="flex items-center gap-3 px-4 py-3 cursor-pointer select-none">
+                            <input
+                              type="checkbox"
+                              checked={isSelected}
+                              onChange={() => toggleService(cat.name)}
+                              className="accent-primary w-4 h-4 shrink-0"
+                            />
+                            <div className="flex-1 min-w-0">
+                              <p className="font-poppins font-semibold text-navy text-sm">{cat.name}</p>
+                              <p className="text-gray-400 text-xs">
+                                {cat.tiers[0].hp}: ₱{cat.tiers[0].price.toLocaleString()} &nbsp;·&nbsp;
+                                {cat.tiers[1].hp}: ₱{cat.tiers[1].price.toLocaleString()}
+                              </p>
+                            </div>
+                          </label>
+                          {isSelected && line && (
+                            <div className="px-4 pb-4 pt-2 border-t border-sky-100 bg-sky-50/50 flex gap-3">
+                              <div className="flex-1">
+                                <label className="block text-xs font-semibold text-gray-500 mb-1.5">HP Size</label>
+                                <select
+                                  value={line.hp}
+                                  onChange={(e) => updateServiceHp(cat.name, e.target.value)}
+                                  className="w-full border border-sky-200 rounded-lg px-3 py-2 text-navy text-sm focus:outline-none focus:ring-2 focus:ring-primary bg-white"
+                                >
+                                  {cat.tiers.map((tier) => (
+                                    <option key={tier.hp} value={tier.hp}>
+                                      {tier.hp} — ₱{tier.price.toLocaleString()}
+                                    </option>
+                                  ))}
+                                </select>
+                              </div>
+                              <div className="w-24">
+                                <label className="block text-xs font-semibold text-gray-500 mb-1.5">Units</label>
+                                <input
+                                  type="number"
+                                  min="1"
+                                  max="20"
+                                  value={line.units}
+                                  onChange={(e) =>
+                                    updateServiceUnits(cat.name, parseInt(e.target.value, 10) || 1)
+                                  }
+                                  className="w-full border border-sky-200 rounded-lg px-3 py-2 text-navy text-sm focus:outline-none focus:ring-2 focus:ring-primary bg-white"
+                                />
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  {serviceError && (
+                    <p className="text-red-500 text-xs mt-2">Please select at least one service.</p>
+                  )}
+
+                  {/* Live price summary */}
+                  {liveLines.length > 0 && (
+                    <div className="mt-3 bg-white border border-sky-200 rounded-xl px-4 py-3 flex flex-col gap-1.5 text-sm">
+                      {liveLines.map((l) => (
+                        <div key={l.catName} className="flex justify-between text-xs text-gray-500">
+                          <span>{l.catName} ({l.hp}) ×{l.units}</span>
+                          <span className="font-semibold text-navy">₱{l.subtotal.toLocaleString()}</span>
+                        </div>
+                      ))}
+                      <div className="border-t border-sky-100 pt-2 flex justify-between">
+                        <span className="font-poppins font-semibold text-navy text-xs">Estimated Total</span>
+                        <span className="font-poppins font-extrabold text-primary text-sm">
+                          ₱{liveTotalPrice.toLocaleString()}
+                        </span>
+                      </div>
+                      <p className="text-gray-400 text-xs">Final price confirmed after inspection.</p>
+                    </div>
+                  )}
                 </div>
 
                 {/* Add-ons */}
                 <div>
-                  <p className="font-poppins font-semibold text-navy text-sm mb-3">Add-On Services <span className="text-gray-400 font-normal">(optional)</span></p>
+                  <p className="font-poppins font-semibold text-navy text-sm mb-3">
+                    Add-On Services <span className="text-gray-400 font-normal">(optional)</span>
+                  </p>
                   <div className="flex flex-col gap-3">
                     {ADD_ONS.map((addon) => (
                       <label key={addon.name} className="flex items-start gap-3 bg-white border border-sky-200 rounded-xl px-4 py-3 cursor-pointer hover:border-primary transition-colors">
@@ -410,8 +568,11 @@ export default function GetAQuotePage() {
                 </div>
 
                 <div>
-                  <label htmlFor="message" className="block font-poppins font-semibold text-navy text-sm mb-2">Additional Notes <span className="text-gray-400 font-normal">(optional)</span></label>
-                  <textarea id="message" name="message" rows={3} placeholder="Any details about your aircon or preferred schedule..."
+                  <label htmlFor="message" className="block font-poppins font-semibold text-navy text-sm mb-2">
+                    Additional Notes <span className="text-gray-400 font-normal">(optional)</span>
+                  </label>
+                  <textarea id="message" name="message" rows={3}
+                    placeholder="Any details about your aircon or preferred schedule..."
                     value={formData.message} onChange={handleChange}
                     className="w-full border border-sky-200 rounded-xl px-4 py-3 text-navy focus:outline-none focus:ring-2 focus:ring-primary bg-white resize-none" />
                 </div>
@@ -419,6 +580,7 @@ export default function GetAQuotePage() {
                 {status === "error" && (
                   <p className="text-red-500 text-sm">Something went wrong. Please try again or contact us directly.</p>
                 )}
+
                 <button type="submit" disabled={status === "loading"}
                   className="bg-primary hover:bg-sky-600 disabled:bg-sky-300 text-white font-poppins font-bold text-lg py-4 rounded-xl transition-colors">
                   {status === "loading" ? "Sending..." : "Request Quote"}
